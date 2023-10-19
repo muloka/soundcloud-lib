@@ -1,5 +1,4 @@
 """ Asyncio """
-
 import asyncio
 import itertools
 import json
@@ -76,7 +75,7 @@ class SoundcloudAPI(sync.SoundcloudAPI):
 
     async def resolve(self, url):  # pylint: disable=invalid-overridden-method
         """Resolve an api url to a soundcloud object"""
-        if not self.client_id:
+        if self.check_last_modified():
             await self.get_credentials()
         full_url = util.RESOLVE_URL.format(url=url, client_id=self.client_id)
         obj = await get_obj_from(full_url)

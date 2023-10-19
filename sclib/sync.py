@@ -1,5 +1,6 @@
 """ Soundcloud api sync objects """
 import json
+import time
 from concurrent import futures
 from ssl import SSLContext
 from urllib.request import urlopen
@@ -47,7 +48,7 @@ class SoundcloudAPI:
     """Soundcloud api client"""
 
     __slots__ = [
-        "client_id",
+        "client_id","next_client_id_update",
     ]
 
     TRACK_API_MAX_REQUEST_SIZE = 50
@@ -57,6 +58,7 @@ class SoundcloudAPI:
             self.client_id = client_id
         else:
             self.client_id = None
+        self.next_client_id_update = 0
 
     def get_credentials(self):
         """get creds"""
@@ -64,10 +66,16 @@ class SoundcloudAPI:
         js_link = util.find_script_urls(page_text)
         js_text = get_page(js_link)
         self.client_id = util.find_client_id(js_text)
+        self.next_client_id_update = int(time.time()) + 300
+
+    def check_last_modified(self):
+        """Check if client id needs to be updated"""
+        now = int(time.time())
+        return (not self.client_id) or (now >= self.next_client_id_update)
 
     def resolve(self, url):
         """Resolve url"""
-        if not self.client_id:
+        if self.check_last_modified():
             self.get_credentials()
         url = util.RESOLVE_URL.format(url=url, client_id=self.client_id)
 

@@ -11,3 +11,6 @@
 /*.egg-info
 
 .idea/*
+
+poetry.lock
+pyproject.toml
